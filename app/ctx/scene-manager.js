@@ -1,3 +1,15 @@
+class ThreeSceneWrapper extends THREE.Scene {
+	get mutableProperties() {
+		return {
+			backgroundColor: this.background,
+		};
+	}
+
+	constructor(args) {
+		super(args);
+	}
+}
+
 export const SceneManager = {
 	camera: null,
 	scene: new THREE.Scene(),
@@ -48,3 +60,5 @@ export const SceneManager = {
 		this.scene.remove(obj3d);
 	},
 }
+
+SceneManager.scene.background = new THREE.Color(0x263d49);

@@ -3,7 +3,7 @@ export class ProcMesh {
 		this.meshArr = [];
 	}
 
-	addPoints(pointArr, materialDef = new THREE.PointsMaterial()) {
+	addPoints(pointArr, materialDef = new THREE.PointsMaterial({ size: 2, sizeAttenuation: false })) {
 		const geom = new THREE.BufferGeometry();
 		geom.setAttribute('position', new THREE.BufferAttribute( Float32Array.from(pointArr), 3 ));
 		this.meshArr.push(
