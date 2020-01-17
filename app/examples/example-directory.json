@@ -1,0 +1,13 @@
+{
+  "example-dir": "/app/examples/",
+  "examples": [
+    {
+       "name": "Ringed Planet",
+       "filename": "ringed-planet.js"
+    },
+    {
+      "name": "Spiral",
+      "filename": "spiral.js"
+    }
+  ]
+}

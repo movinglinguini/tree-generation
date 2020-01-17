@@ -9,15 +9,16 @@ function main() {
 	// draw some examples
 	// drawRingedPlanet(ENGINE);
 	// drawCactus(ENGINE);
-	drawSpiral(ENGINE);
-
-	const grid = new THREE.GridHelper(1000, 100);
+	// drawSpiral(ENGINE);
 	// ENGINE.renderObject(grid);
 
-	ENGINE.onUpdate = (delta) => {
-		// ringedPlanetUpdate(delta);
-		updateSpiral(delta);
-	}
+	drawSpiral(ENGINE);
+
+	buildExampleMenu();
+}
+
+function buildExampleMenu() {
+	
 }
 
 window.onload = main;

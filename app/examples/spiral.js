@@ -1,5 +1,5 @@
 import { Utils } from '../utils/utils.js';
-import { ProcMesh } from '../classes/ProcMesh.class.js';
+import { PointMesh } from '../classes/ProcMesh.class.js';
 
 let spiralMesh = null;
 let rotationSpeed = .001;
@@ -12,7 +12,7 @@ export function drawSpiral(ENGINE) {
 
 	const points = [];
 	const invPoints = [];
-	spiralMesh = new ProcMesh();
+	spiralMesh = new PointMesh();
 	for (let i = 0; i < steps; i += 1) {
 		const sph = Utils.getRandomSphericalCoord({
 			radiusFunc(x) {
@@ -35,8 +35,17 @@ export function drawSpiral(ENGINE) {
 
 	spiralMesh.addPoints(points);
 	spiralMesh.addPoints(invPoints);
+	spiralMesh.setMeshUpdateRoutine({
+		currentRadius: radius,
+		oldScale: new THREE.Matrix4(),
+		oldInvScale: new THREE.Matrix4(),
+		rotationSpeed,
+		pulsateSpeed,
+	}, updateSpiral);
+
 	ENGINE.renderObject(spiralMesh.getMesh());
 	ENGINE.renderObject(spiralMesh.getMesh(1));
+	ENGINE.addUpdateRoutine((delta) => spiralMesh.doUpdateRoutine(delta), 'spiral-update');
 }
 
 let elapsedTime = 0;
@@ -45,15 +54,19 @@ let oldScale = new THREE.Matrix4();
 let oldInvScale = new THREE.Matrix4();
 
 export function updateSpiral(delta) {
+	const rotationSpeed = this.getParamValue('rotationSpeed');
 	const rotation = new THREE.Matrix4().makeRotationY(delta * rotationSpeed);
 	const rotation1 = new THREE.Matrix4().makeRotationZ(delta * rotationSpeed * 3);
 	const rotation2 = new THREE.Matrix4().makeRotationX(delta * rotationSpeed * 3);
-	const scaleSize = Math.cos(elapsedTime * pulsateSpeed) + 0.000001;
-	const invScaleSize = Math.sin(elapsedTime * (pulsateSpeed)) + 0.000001;
+	const scaleSize = Math.cos(
+		this.getParamValue('elapsedTime') * this.getParamValue('pulsateSpeed')) + 0.000001;
+	const invScaleSize = Math.sin(
+		this.getParamValue('elapsedTime') * (this.getParamValue('pulsateSpeed'))) + 0.000001;
 
-	elapsedTime += delta;
+	this.setParam('elapsedTime', delta, '+=');
 	const newScale = new THREE.Matrix4().makeScale(scaleSize, scaleSize, scaleSize);
 	const newInvScale = new THREE.Matrix4().makeScale(invScaleSize, invScaleSize, invScaleSize);
+	const oldScale = this.getParamValue('oldScale');
 
 	const transformation = new THREE.Matrix4()
 		.multiply(oldScale.getInverse(oldScale))
@@ -61,8 +74,9 @@ export function updateSpiral(delta) {
 		.multiply(rotation1)
 		.multiply(newScale);
 
+	this.setParam('oldScale', newScale);
 
-	oldScale = newScale;
+	const oldInvScale = this.getParamValue('oldInvScale');
 
 	const invTransformation = new THREE.Matrix4()
 		.multiply(oldInvScale.getInverse(oldInvScale))
@@ -70,8 +84,9 @@ export function updateSpiral(delta) {
 		.multiply(rotation.getInverse(rotation))
 		.multiply(rotation2);
 
-	oldInvScale = newInvScale;
+	this.setParam('oldInvScale', newInvScale);
 
+	const spiralMesh = this.getParamValue('mesh');
 	spiralMesh.getMesh().applyMatrix(transformation);
 	spiralMesh.getMesh(1).applyMatrix(invTransformation);
 }

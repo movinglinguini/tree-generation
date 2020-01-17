@@ -1,19 +1,47 @@
-export class ProcMesh {
-	constructor(pointArr) {
+import { UpdateRoutine } from './update-routine.class.js';
+
+export class UpdatableMesh {
+	constructor(vertexArr) {
 		this.meshArr = [];
+		this._updateRoutine = new UpdateRoutine();
+	}
+
+	getMesh(meshIndex = 0) {
+		return this.meshArr[meshIndex];
+	}
+
+	addMesh(mesh, mIndex = -1) {
+		if (mIndex === -1) {
+			this.meshArr.push(mesh);
+		} else {
+			this.meshArr[mIndex] = mesh;
+		} 
+
+		return this.getMesh(mIndex === -1 ? this.meshArr.length - 1 : mIndex);
+	}
+
+	setMeshUpdateRoutine(parameters, routine) {
+		parameters['mesh'] = this;
+		this._updateRoutine = new UpdateRoutine(parameters, routine);
+	}
+
+	doUpdateRoutine(delta) {
+		this._updateRoutine.doRoutine(delta);
+	}
+}
+
+export class PointMesh extends UpdatableMesh {
+	constructor(vertexArr) {
+		super(vertexArr);
 	}
 
 	addPoints(pointArr, materialDef = new THREE.PointsMaterial()) {
 		const geom = new THREE.BufferGeometry();
 		geom.setAttribute('position', new THREE.BufferAttribute( Float32Array.from(pointArr), 3 ));
-		this.meshArr.push(
-			new THREE.Points(geom, materialDef)
-		);
+		// this.meshArr.push(
+		// 	new THREE.Points(geom, materialDef)
+		// );
 
-		return this.meshArr[this.meshArr.length - 1];
-	}
-
-	getMesh(meshIndex = 0 ) {
-		return this.meshArr[meshIndex];
+		return this.addMesh(new THREE.Points(geom, materialDef));
 	}
 }

@@ -1,5 +1,5 @@
 import { Utils } from '../utils/utils.js';
-import { ProcMesh } from '../classes/ProcMesh.class.js';
+import { PointMesh } from '../classes/ProcMesh.class.js';
 
 let cactusMesh = null;
 const rotationSpeed = 2;
@@ -9,7 +9,7 @@ export function drawCactus(ENGINE) {
 	const levelLimit = 5;
 	const pointLimit = 500;
 
-	cactusMesh = new ProcMesh();
+	cactusMesh = new PointMesh();
 	const cactusOffset = new THREE.Vector3();
 	const points = [];
 	for (let i = 0; i < levelLimit; i += 1) {
