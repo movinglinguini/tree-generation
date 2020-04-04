@@ -1,6 +1,10 @@
 import { RenderManager as eRenderManager } from './render-manager.js';
 import { SceneManager as eSceneManager } from './scene-manager.js';
 
+const ENGINE_UTILS = {
+	deg2Rad: ( (deg) => deg * (Math.PI/ 180) ),
+}
+
 export const ENGINE = {
 	_container: {
 		el: null,
@@ -9,7 +13,16 @@ export const ENGINE = {
 	},
 	_containerChangeFlag: false,
 	_cameraControls: null,
+	_grids: {
+		xz: new THREE.GridHelper(1000, 100),
+		xy: new THREE.GridHelper(1000, 100).rotateX(ENGINE_UTILS.deg2Rad(90)),
+	},
+	_canDrawGrids: {
+		xz: true,
+		xy: false,
+	},
 	_lastDrawTime: new Date(),
+	_updateRoutines: {},
 	renderObject(threeObj) {
 		eSceneManager.addToScene(threeObj);
 	},
@@ -47,6 +60,14 @@ export const ENGINE = {
 			this._containerChangeFlag = false;
 		}
 
+		{
+			Object.keys(this._canDrawGrids).forEach(k => {
+				if (!this._canDrawGrids[k]) {
+					this._grids[k].visible = false;
+				}
+			})
+		}
+
 		const now = new Date().getTime();
 		this.onUpdate(now - this._lastDrawTime);
 		this._lastDrawTime = now;
@@ -66,8 +87,30 @@ export const ENGINE = {
 		});
 	},
 
-	onUpdate() {},
+	onUpdate(delta) {
+		Object.values(this._updateRoutines).forEach(routine => routine(delta));
+	},
+
+	addUpdateRoutine(newRoutine, newRoutineKey, allowReplace=false) {
+		let canAddRoutine = (
+			!this._updateRoutines[newRoutineKey]
+			|| allowReplace
+		);
+
+		if (!canAddRoutine) {
+			console.warn('Failed to add routine: ', newRoutineKey);
+			return;
+		}
+
+		console.log('new routine::key:', newRoutineKey, 'func:', newRoutine);
+		this._updateRoutines[newRoutineKey] = newRoutine;
+	},
+
+	utils: ENGINE_UTILS,
 };
+
+// eSceneManager.addToScene(ENGINE._grids.xz);
+// eSceneManager.addToScene(ENGINE._grids.xy);
 
 ENGINE._lastDrawTime = new Date().getTime();
 ENGINE.draw();

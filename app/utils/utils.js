@@ -1,6 +1,6 @@
 export const Utils = {
-	sphericalToVector3(radius, phi, theta) {
-		return new THREE.Vector3().setFromSpherical(new THREE.Spherical(radius, phi, theta));
+	sphericalToVector3(sphCoords) {
+		return new THREE.Vector3().setFromSpherical(new THREE.Spherical(sphCoords.radius, sphCoords.phi, sphCoords.theta));
 	},
 	vector3ToPointBuffer(vector3) {
 		return [ vector3.x, vector3.y, vector3.z ];
